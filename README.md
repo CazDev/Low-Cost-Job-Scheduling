@@ -10,5 +10,5 @@ The solution can be found insde the **src** folder. **ds-server** must be execut
 [DS-SIM User Guide](https://github.com/CazDev/Low-Cost-Job-Scheduling/blob/master/ds-sim_user-guide.pdf) 
 * Document provided for us explaining how ds-sim works.
 
-[First Best Fit Scheduling Algorithm Documentation](https://docs.google.com/document/d/1cPsxKUsl4Y-AvaaDkPmGoqrZwAyDsdTaCcJVKkp94ZY/edit?usp=sharing)
+[Low Cost Scheduling Algorithm Documentation](https://docs.google.com/document/d/1cPsxKUsl4Y-AvaaDkPmGoqrZwAyDsdTaCcJVKkp94ZY/edit?usp=sharing)
 * More in-depth documentation for this project.
