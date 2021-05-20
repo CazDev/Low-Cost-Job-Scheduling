@@ -2,7 +2,7 @@
 
 This repo contains the code for Stage 2 COMP3100 Assignment 2 code
 
-The solution can be found insde the **src** folder. **ds-server** must be executed first with correct arguments then **Client.java**
+The solution can be found insde the **src** folder. **ds-server** must be executed first with correct arguments then **Client.java**. **ds-client** can also be used for testing with the -a argument to select an algorithm (ff, wf, bf)
 
 ---
 
