@@ -174,11 +174,11 @@ public class Client {
 		return "SCHD " + job.get(0).getID() + " " + serverInfo;
 	}
 
-	/* 
-		We have chosen to comment out the console printing portions of
-		sendMessage() and readMessage() as it significantly reduces the
-		speed of the test files/scripts. 
-	*/
+	//
+	//	We have chosen to comment out the console printing portions of
+	//	sendMessage() and readMessage() as it significantly reduces the
+	//	speed of the test files/scripts. 
+	//
 
 	private void sendMessage (String outStr) {
 		// send message to server
@@ -205,7 +205,7 @@ public class Client {
 		inStr = new String(cbuf, 0, cbuf.length);
 
 		// Display incoming message from server
-		//System.out.println("INC: " + inStr);
+		// System.out.println("INC: " + inStr);
 		return inStr;
 	}
 

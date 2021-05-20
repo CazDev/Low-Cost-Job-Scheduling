@@ -61,7 +61,6 @@ public class Server {
 			return this.runTime;
 		}
 
-
 		//
 		// type: an identifier of job category based on run time
 		//
