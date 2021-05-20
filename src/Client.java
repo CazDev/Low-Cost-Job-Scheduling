@@ -18,7 +18,6 @@ public class Client {
 	private BufferedReader input = null;
 	private DataOutputStream out = null;
 	private BufferedReader in = null;
-	
 
 	// constructor to put ip address and port
 	public Client(String address, int port) throws IOException {
