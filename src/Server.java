@@ -12,6 +12,7 @@ public class Server {
 	private int runTime;
 	private int waitTime;
 
+		// Most basic Server constructor
 		public Server(String type, int limit, int bootTime, float hourlyRate, int coreCount, int memory, int disk){
 			this.type = type;
 			this.limit = limit;
@@ -22,7 +23,7 @@ public class Server {
 			this.disk = disk;
 		}
 
-		// Server constructor
+		// Server constructor with state, waitTime, runTime for stage 2
 		public Server(String type, int id, String state, int bootTime, int coreCount, int memory, int disk, int waitTime, int runTime ){
 			this.type = type;
 			this.bootTime = bootTime;
