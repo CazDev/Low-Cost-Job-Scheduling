@@ -9,8 +9,8 @@ public class Server {
 	private int id;
 	private String state;
 	private int startTime;
-	private int runJobs;
-	private int waitJobs;
+	private int runTime;
+	private int waitTime;
 
 		public Server(String type, int limit, int bootTime, float hourlyRate, int coreCount, int memory, int disk){
 			this.type = type;
@@ -23,7 +23,7 @@ public class Server {
 		}
 
 		// Server constructor
-		public Server(String type, int id, String state, int bootTime, int coreCount, int memory, int disk, int waitJobs, int runJobs ){
+		public Server(String type, int id, String state, int bootTime, int coreCount, int memory, int disk, int waitTime, int runTime ){
 			this.type = type;
 			this.bootTime = bootTime;
 			this.coreCount = coreCount;
@@ -32,8 +32,8 @@ public class Server {
 			this.type = type;
 			this.id = id;
 			this.state = state;
-			this.waitJobs = waitJobs;
-			this.runJobs = runJobs;
+			this.waitTime = waitTime;
+			this.runTime = runTime;
 		}
 		
 		// returns int for server ID
@@ -52,13 +52,13 @@ public class Server {
 		}
 
 		// returns an int for wait time for server
-		public int getWaitJob(){
-			return this.waitJobs;
+		public int getWaitTime(){
+			return this.waitTime;
 		}
 
 		// returns an int for run time for server
-		public int getRunJob(){
-			return this.runJobs;
+		public int getRunTime(){
+			return this.runTime;
 		}
 
 
