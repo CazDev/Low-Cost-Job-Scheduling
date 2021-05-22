@@ -112,14 +112,4 @@ public class Server {
 		public int getDisk() {
 			return this.disk;
 		}
-
-		//
-		// This is a debug method to print all the fields of a given server object;
-		// 	this is essentially a 'toString()'-like method.
-		//
-        public void printData(){
-             System.out.println(this.type + " " + this.limit + " " + this.bootTime + " " + this.hourlyRate + " " + this.coreCount + " " + this.memory + " " + this.disk);
-        }
-
-
 }

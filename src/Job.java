@@ -1,11 +1,10 @@
-	/**
- 	 * Job class to assist in reading data sent from server
-     *
-	 * This class includes getters for all fields of this class
-	 *
-	 */
+	//
+ 	// Job class to assist in reading data sent from server
+	// This class includes getters for all fields of this class
+	//
 	public class Job{
 
+		// Variables needed for a job object
 		private int startTime;
 		private int jobID;
 		private int estRunTime;
@@ -13,6 +12,7 @@
 		private int memoryReq;
 		private int diskReq;
 
+		// Job constructor
 		public Job(int startTime, int jobID, int estRunTime, int coreReq, int memoryReq, int diskReq){
 			this.startTime = startTime;
 			this.jobID = jobID;
