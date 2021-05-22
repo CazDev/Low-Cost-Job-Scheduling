@@ -18,6 +18,7 @@ public class Client {
 	private BufferedReader input = null;
 	private DataOutputStream out = null;
 	private BufferedReader in = null;
+	
 
 	// constructor to put ip address and port
 	public Client(String address, int port) throws IOException {
@@ -45,16 +46,16 @@ public class Client {
 		sendMessage("AUTH " + System.getProperty("user.name"));
 		readMessage();
 
-		// read ds-system xml file and populate Server ArrayList
-		ArrayList<Server> t = new ArrayList<Server>();
-		t = readXML("ds-system.xml");
-
-		// find index of largest server type (most cores)
-		int largestServer = findLargest(t);
-
 		// handshake completed
 		boolean connected = true;
+
+		// populate arrayList of server objects from:
+		ArrayList<Server> servers = new ArrayList<Server>();
+
+		// arrayList for holding job info from "GETS Capable"
+		ArrayList<Job> jobs = new ArrayList<Job>();
 		
+
 		// Tells client it is ready to recieve commands
 		sendMessage("REDY");
 
@@ -62,23 +63,52 @@ public class Client {
 		// we check the contents of this string, rather than call readMessage() 
 		String msg = readMessage();
 		
+
 		// SCHEDULES JOB TO LARGEST SERVER
 		while (connected){
-
+			// Job completed we tell ds-server we are ready
 			if (msg.contains("JCPL")){
 				sendMessage("REDY");
-				msg = readMessage();
-			} else if (msg.contains("NONE")){
+				msg = readMessage(); 
+				// there are no more jobs left
+			} else if (msg.contains("NONE")){ // there are no more jobs left
 				connected = false;
 				sendMessage("QUIT");
 			}else {
-				sendMessage(toLargest(msg, t.get(largestServer)));
-				msg = readMessage();
 
-				sendMessage("REDY");
-				msg = readMessage();
+				// Get next message
+				if (msg.contains("OK")){ 
+					sendMessage("REDY");
+					msg = readMessage();
+				}
+
+				// we have a JOB incoming, so we create a job objet based on it
+				if (msg.contains("JOBN")){
+					jobs.add(jobCreator(msg)); // create job 
+
+					// the job arrayList will only ever have 1 item in it at a time...
+					sendMessage(getsCapable(jobs.get(0))); // GETS Capable called
+					msg = readMessage();
+
+					sendMessage("OK");
+
+					// list of capable servers are added to arrayList of server objects
+					msg = readMessage();
+					servers = serverCreator(msg);
+					sendMessage("OK");
+				
+					// we should receive a "." here
+					msg = readMessage();
+
+					sendMessage(lowCost(servers, jobs)); // Scheduling algorithm called here
+					msg = readMessage();
+
+					// only need one job at a time
+					jobs.remove(0);
+				} 
 			} 
 		}
+
 		
 		// close the connection
 		try {
@@ -98,33 +128,19 @@ public class Client {
 		System.exit(1);
 	}
 
+
 	// receives string input and the largest server as input
 	// schedules job to largest server
-	private String toLargest(String job, Server s){
-		String[] splitStr = job.split("\\s+");
-		return "SCHD " + splitStr[2] + " " + s.getType() + " " + (s.getLimit()-s.getLimit());
-		
-		// the index [2] represents the job ID from the String "job"
-		//		This string is sent by ds-server to the client 
-		
-	}
+	//private String toLargest(String job, Server s){
+	//	String[] splitStr = job.split("\\s+");
+	//	return "SCHD " + splitStr[2] + " " + s.getType() + " " + (s.getLimit()-s.getLimit());
+	//	
+	//	// the index [2] represents the job ID from the String "job"
+	//	//		This string is sent by ds-server to the client 
+	//	
+	//}
 
-	// find index of largest server, relative to number of cores
-	private int findLargest(ArrayList<Server> s){
-		int lrgNum = 0;
-		int lrgIndex = 0;
-
-		for (int i = 0; i < s.size(); i++){
-
-			if (s.get(i).getCores() > lrgNum){
-				lrgIndex = i;
-				lrgNum = s.get(i).getCores();
-			} 
-		}
-
-		return lrgIndex;
-	}
-
+	
 	//
 	// Most basic implementation of first fit
 	//
@@ -140,6 +156,8 @@ public class Client {
 		return "SCHD " + job.get(0).getID() + " " + ServerInfo;
 	}
 
+
+
 	//
 	// Low cost implementation
 	// Reduce cost server rental cost
@@ -147,38 +165,117 @@ public class Client {
 	//
 	public String lowCost(ArrayList<Server> servers, ArrayList<Job> job){
 
-		// String with current server information
-		String serverInfo = ""; 
+		// Server information string
+		String ServerInfo = "";
 
-		for (Server server: servers){
-			// Ensure the server is already active or idle to reduce cost
-			if (server.getState().equals("2") || server.getState().equals("3")) {
+		for (Server server: servers) {
 
-				// find best fit for job
-				if (server.getDisk() >= job.get(0).getDiscReq() 
-				&& server.getCores() >= job.get(0).getCoreReq() 
-				&& server.getMemory() >= job.get(0).getMemoryReq()){
-					// Get this servers information
-					serverInfo = server.getType() + " " + server.getID();
-					// Schedule this job
-				   	return "SCHD " + job.get(0).getID() + " " + serverInfo;
-				// When there is no optimal server, just use first server.
-			   	} else {
+			// find best fit for job
+			if (server.getDisk() >= job.get(0).getDiskReq() &&
+				server.getCores() >= job.get(0).getCoreReq() &&
+				server.getMemory() >= job.get(0).getMemoryReq()) {
+
+				// Ensure the server is already active or idle to reduce cost
+				if (server.getState().equals("2") || server.getState().equals("3")) {
+					ServerInfo = server.getType() + " " + server.getID();
+					return "SCHD " + job.get(0).getID() + " " + ServerInfo;
+				}
+				else {
 					// Send job to first server
-					serverInfo = servers.get(0).getType() + " " + servers.get(0).getID();
-			   	}
+					ServerInfo = servers.get(0).getType() + " " + servers.get(0).getID();
+				}
+			}
+			// When there is no optimal server, just use first server.
+			else {
+				// Send job to first server
+				ServerInfo = servers.get(0).getType() + " " + servers.get(0).getID();
+			}
+		}
+		// There is only one job in queue so schedule it
+		return "SCHD " + job.get(0).getID() + " " + ServerInfo;
+	}
+
+	public String custFirstFit(ArrayList<Server> servers, ArrayList<Job> job){
+
+		String serv = ""; // string for holding the server info to return back
+
+		for (Server s: servers){
+			// find best fit for job
+			if (s.getDisk() >= job.get(0).getDiskReq() && s.getCores() >= job.get(0).getCoreReq() && s.getMemory() >= job.get(0).getMemoryReq()){
+			 	serv = s.getType() + " " + s.getID();
+				return "SCHD " + job.get(0).getID() + " " + serv;
+			} else { // if there are non that are absolutely optimal in the GETS Capable list, we just defer to the first from that list
+				serv = servers.get(0).getType() + " " + servers.get(0).getID(); //servers.get(0) is the first server on the returned list
 			}
 		}
 		// we know job.get(0) will work as there is only ever 1 item in the job arrayList at a time
-		return "SCHD " + job.get(0).getID() + " " + serverInfo;
+		return "SCHD " + job.get(0).getID() + " " + serv;
 	}
 
+
+
+	// takes server input and creates arrayList of CAPABLE SERVER OBJECTS
+	public ArrayList<Server> serverCreator(String server){
+
+		// remove unwanted data from string i.e. trailing space etc.
+		server = server.trim();
+
+		// temp arrayList to be passed back
+		ArrayList<Server> newList = new ArrayList<Server>();
+
+		// split strings by newline
+		String[] lines = server.split("\\r?\\n");
+ 		
+		for (String line : lines) {
+
+			// split each line by white space
+			String[] splitStr = line.split("\\s+");
+
+			/* 
+			Constructing based off of this definition:
+				String		int			String		int			int		int		int		int		int
+				serverType 	serverID 	state 	curStartTime 	core 	mem 	disk 	#wJobs 	#rJobs
+			*/
+
+			//						server type		server ID					state		curStart Time					core count						memory						disk							wJobs							rJobs
+			Server s = new Server(splitStr[0], Integer.parseInt(splitStr[1]), splitStr[2], Integer.parseInt(splitStr[3]), Integer.parseInt(splitStr[4]), Integer.parseInt(splitStr[5]), Integer.parseInt(splitStr[6]), Integer.parseInt(splitStr[7]), Integer.parseInt(splitStr[8]) );
+			newList.add(s);
+        }
+
+		return newList;
+	}
+
+	
 	//
+	//	string input to create a new job object
+	//
+	public Job jobCreator(String job){
+
+		// get rid of trailing stuff in message
+		// this is vital otherwise trailing whitespace 
+		// 		will cause an error in parsing the strings to ints
+		job = job.trim();
+
+		// split string up by white space; "\\s+" is a regex expression
+		String[] splitStr = job.split("\\s+");
+
+		/* 
+			Create a new job object;
+				[1] = submit Time	| [4] = core req
+				[2] = jobID	 	 	| [5] =	memory req
+				[3] = run Time 	 	| [6] =	disk req
+		*/
+		Job j = new Job(Integer.parseInt(splitStr[1]), Integer.parseInt(splitStr[2]), Integer.parseInt(splitStr[3]),  Integer.parseInt(splitStr[4]) ,Integer.parseInt(splitStr[5]), Integer.parseInt(splitStr[6]));
+
+		// returns job object to fill arrayList
+		return j;
+	}
+
+	// 
 	//	We have chosen to comment out the console printing portions of
 	//	sendMessage() and readMessage() as it significantly reduces the
 	//	speed of the test files/scripts. 
 	//
-
 	private void sendMessage (String outStr) {
 		// send message to server
 		byte[] byteMsg = outStr.getBytes();
@@ -189,13 +286,13 @@ public class Client {
 		}
 
 		// Display outgoing message from client
-		//System.out.println("OUT: " + outStr);		
+		System.out.println("OUT: " + outStr);		
 	}
 
 	private String readMessage () {
 		// read string sent from server
 		String inStr = "";
-		char[] cbuf = new char[65535];
+		char[] cbuf = new char[Short.MAX_VALUE];
 		try {
 			in.read(cbuf);
 		} catch (IOException e) {
@@ -206,6 +303,15 @@ public class Client {
 		// Display incoming message from server
 		// System.out.println("INC: " + inStr);
 		return inStr;
+	}
+
+	//
+	//	SENDS THE QUERY FOR AVAILABLE SERVERS 
+	//
+	public String getsCapable(Job j){
+		
+		// grab info from job inputted job object
+		return("GETS Capable " + j.getCoreReq() + " " + j.getMemoryReq() + " " + j.getDiskReq());
 	}
 
 	private static void connect(String address, int port) {
@@ -230,12 +336,6 @@ public class Client {
 				}
 			}
 		}
-	}
-
-	public static void main(String args[]) throws IOException {
-		// Specify Server IP address and Port
-		Client client = new Client("127.0.0.1", 50000);
-		client.start();
 	}
 
 	
@@ -277,5 +377,11 @@ public class Client {
 		return serverList;
     }
 
+
+	public static void main(String args[]) throws IOException {
+		// Specify Server IP address and Port
+		Client client = new Client("127.0.0.1", 50000);
+		client.start();
+	}
 	
 }

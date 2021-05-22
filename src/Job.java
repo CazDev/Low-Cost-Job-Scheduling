@@ -6,49 +6,43 @@
 	 */
 	public class Job{
 
-		private String job;
 		private int startTime;
-		private int id;
-		private int estimatedRunTime;
-		private int cpu;
-		private int memory;
-		private int disk;
+		private int jobID;
+		private int estRunTime;
+		private int coreReq;
+		private int memoryReq;
+		private int diskReq;
 
-		Job(String[] job){
-			this.job = job[0];
-			this.startTime = Integer.parseInt(job[1]);
-			this.id = Integer.parseInt(job[2]);
-			this.estimatedRunTime = Integer.parseInt(job[3]);
-			this.cpu = Integer.parseInt(job[4]);
-			this.memory = Integer.parseInt(job[5]);
-			this.disk = Integer.parseInt(job[6]);
-		}
-
-		public String getJob(){
-			return this.job;
+		public Job(int startTime, int jobID, int estRunTime, int coreReq, int memoryReq, int diskReq){
+			this.startTime = startTime;
+			this.jobID = jobID;
+			this.estRunTime = estRunTime;
+			this.coreReq = coreReq;
+			this.memoryReq = memoryReq;
+			this.diskReq = diskReq;
 		}
 
 		public int getStartTime(){
 			return this.startTime;
 		}
-
+	
 		public int getID(){
-			return this.id;
+			return this.jobID;
 		}
-
-		public int getEstimatedRunTime(){
-			return this.estimatedRunTime;
+	
+		public int getRunTime(){
+			return this.estRunTime;
 		}
-
+	
 		public int getCoreReq(){
-			return this.cpu;
+			return this.coreReq;
 		}
-
+		
 		public int getMemoryReq(){
-			return this.memory;
+			return this.memoryReq;
 		}
-
-		public int getDiscReq(){
-			return this.disk;
+	
+		public int getDiskReq(){
+			return this.diskReq;
 		}
 	}
