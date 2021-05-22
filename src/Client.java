@@ -156,8 +156,6 @@ public class Client {
 		return "SCHD " + job.get(0).getID() + " " + ServerInfo;
 	}
 
-
-
 	//
 	// Low cost implementation
 	// Reduce cost server rental cost
@@ -195,51 +193,43 @@ public class Client {
 		return "SCHD " + job.get(0).getID() + " " + ServerInfo;
 	}
 
-	public String custFirstFit(ArrayList<Server> servers, ArrayList<Job> job){
+	//
+	// Create new server object
+	//
+	public ArrayList<Server> serverCreator(String s){
 
-		String serv = ""; // string for holding the server info to return back
-
-		for (Server s: servers){
-			// find best fit for job
-			if (s.getDisk() >= job.get(0).getDiskReq() && s.getCores() >= job.get(0).getCoreReq() && s.getMemory() >= job.get(0).getMemoryReq()){
-			 	serv = s.getType() + " " + s.getID();
-				return "SCHD " + job.get(0).getID() + " " + serv;
-			} else { // if there are non that are absolutely optimal in the GETS Capable list, we just defer to the first from that list
-				serv = servers.get(0).getType() + " " + servers.get(0).getID(); //servers.get(0) is the first server on the returned list
-			}
-		}
-		// we know job.get(0) will work as there is only ever 1 item in the job arrayList at a time
-		return "SCHD " + job.get(0).getID() + " " + serv;
-	}
-
-
-
-	// takes server input and creates arrayList of CAPABLE SERVER OBJECTS
-	public ArrayList<Server> serverCreator(String server){
-
-		// remove unwanted data from string i.e. trailing space etc.
-		server = server.trim();
+		// remove trailing spaces
+		s = s.trim();
 
 		// temp arrayList to be passed back
 		ArrayList<Server> newList = new ArrayList<Server>();
 
 		// split strings by newline
-		String[] lines = server.split("\\r?\\n");
+		String[] lines = s.split("\\r?\\n");
  		
 		for (String line : lines) {
 
 			// split each line by white space
 			String[] splitStr = line.split("\\s+");
 
-			/* 
-			Constructing based off of this definition:
-				String		int			String		int			int		int		int		int		int
-				serverType 	serverID 	state 	curStartTime 	core 	mem 	disk 	#wJobs 	#rJobs
-			*/
+			// 
+			// Constructing based off of this definition:
+			//	String		int			String		int			int		int		int		int			int
+			//	serverType 	serverID 	state 	curStartTime 	core 	mem 	disk 	waittinme 	runtime
+			//
 
 			//						server type		server ID					state		curStart Time					core count						memory						disk							wJobs							rJobs
-			Server s = new Server(splitStr[0], Integer.parseInt(splitStr[1]), splitStr[2], Integer.parseInt(splitStr[3]), Integer.parseInt(splitStr[4]), Integer.parseInt(splitStr[5]), Integer.parseInt(splitStr[6]), Integer.parseInt(splitStr[7]), Integer.parseInt(splitStr[8]) );
-			newList.add(s);
+			Server server = new Server(splitStr[0], 
+								Integer.parseInt(splitStr[1]),
+								splitStr[2], 
+								Integer.parseInt(splitStr[3]), 
+								Integer.parseInt(splitStr[4]), 
+								Integer.parseInt(splitStr[5]), 
+								Integer.parseInt(splitStr[6]), 
+								Integer.parseInt(splitStr[7]), 
+								Integer.parseInt(splitStr[8]) 
+								);
+			newList.add(server);
         }
 
 		return newList;
@@ -247,25 +237,28 @@ public class Client {
 
 	
 	//
-	//	string input to create a new job object
+	//	create a new job object
 	//
 	public Job jobCreator(String job){
 
-		// get rid of trailing stuff in message
-		// this is vital otherwise trailing whitespace 
-		// 		will cause an error in parsing the strings to ints
+		// remove trailing spaces
 		job = job.trim();
 
 		// split string up by white space; "\\s+" is a regex expression
 		String[] splitStr = job.split("\\s+");
 
-		/* 
-			Create a new job object;
-				[1] = submit Time	| [4] = core req
-				[2] = jobID	 	 	| [5] =	memory req
-				[3] = run Time 	 	| [6] =	disk req
-		*/
-		Job j = new Job(Integer.parseInt(splitStr[1]), Integer.parseInt(splitStr[2]), Integer.parseInt(splitStr[3]),  Integer.parseInt(splitStr[4]) ,Integer.parseInt(splitStr[5]), Integer.parseInt(splitStr[6]));
+		//
+		//	Create a new job object;
+		//		[1] = submit Time	| [4] = core req
+		//		[2] = jobID	 	 	| [5] =	memory req
+		//		[3] = run Time 	 	| [6] =	disk req
+		//
+		Job j = new Job(Integer.parseInt(splitStr[1]), 
+						Integer.parseInt(splitStr[2]), 
+						Integer.parseInt(splitStr[3]),  
+						Integer.parseInt(splitStr[4]),
+						Integer.parseInt(splitStr[5]), 
+						Integer.parseInt(splitStr[6]));
 
 		// returns job object to fill arrayList
 		return j;
@@ -306,7 +299,7 @@ public class Client {
 	}
 
 	//
-	//	SENDS THE QUERY FOR AVAILABLE SERVERS 
+	//	GET THE AVAILABLE SERVERS with "GETS Capable"
 	//
 	public String getsCapable(Job j){
 		
@@ -338,7 +331,9 @@ public class Client {
 		}
 	}
 
-	
+	//
+	// Read XML provider by server
+	//
 	public static ArrayList<Server> readXML(String fileName){
         ArrayList<Server> serverList = new ArrayList<Server>();
 		
