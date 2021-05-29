@@ -121,7 +121,7 @@ public class Client {
 			}
 				
 		} catch (IOException i) {
-			System.out.println(i);
+			//System.out.println(i);
 		}
 
 		// Exit the program
@@ -279,7 +279,7 @@ public class Client {
 		}
 
 		// Display outgoing message from client
-		System.out.println("OUT: " + outStr);		
+		//System.out.println("OUT: " + outStr);		
 	}
 
 	private String readMessage () {
@@ -313,15 +313,15 @@ public class Client {
 		int tryNum = 1;
 		while (true) {
 			try {
-				System.out.println("Connecting to server at: " + address + ":" + port);
+				//System.out.println("Connecting to server at: " + address + ":" + port);
 				socket = new Socket(address, port);
-				System.out.println("Connected");
+				//System.out.println("Connected");
 				break; // we connected, so exit the loop
 			} catch (IOException e) {
 				// reconnect failed, wait.
 				secondsToWait = Math.min(30, Math.pow(2, tryNum));
 				tryNum++;
-				System.out.println("Connection timed out, retrying in  " + (int) secondsToWait + " seconds ...");
+				//System.out.println("Connection timed out, retrying in  " + (int) secondsToWait + " seconds ...");
 				try {
 					TimeUnit.SECONDS.sleep((long) secondsToWait);
 				} catch (InterruptedException ie) {
