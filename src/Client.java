@@ -84,7 +84,7 @@ public class Client {
 
 				// we have a JOB incoming, so we create a job objet based on it
 				if (msg.contains("JOBN")){
-					jobs.add(jobCreator(msg)); // create job 
+					jobs.add(addJob(msg)); // create job 
 
 					// the job arrayList will only ever have 1 item in it at a time...
 					sendMessage(getsCapable(jobs.get(0))); // GETS Capable called
@@ -94,7 +94,7 @@ public class Client {
 
 					// list of capable servers are added to arrayList of server objects
 					msg = readMessage();
-					servers = serverCreator(msg);
+					servers = addServer(msg);
 					sendMessage("OK");
 				
 					// we should receive a "." here
@@ -171,17 +171,13 @@ public class Client {
 			// find best fit for job
 			if (server.getDisk() >= job.get(0).getDiskReq() &&
 				server.getCores() >= job.get(0).getCoreReq() &&
-				server.getMemory() >= job.get(0).getMemoryReq()) {
+				server.getMemory() >= job.get(0).getMemoryReq() &&
+				// Ensure start time is greater than runnning time
+				job.get(0).getStartTime() >= job.get(0).getRunTime()) {
 
-				// Ensure the server is already active or idle to reduce cost
-				if (server.getState().equals("2") || server.getState().equals("3")) {
+					// Ensure the server is already active or idle to reduce cost
 					ServerInfo = server.getType() + " " + server.getID();
 					return "SCHD " + job.get(0).getID() + " " + ServerInfo;
-				}
-				else {
-					// Send job to first server
-					ServerInfo = servers.get(0).getType() + " " + servers.get(0).getID();
-				}
 			}
 			// When there is no optimal server, just use first server.
 			else {
@@ -196,7 +192,7 @@ public class Client {
 	//
 	// Create new server object
 	//
-	public ArrayList<Server> serverCreator(String s){
+	public ArrayList<Server> addServer(String s){
 
 		// remove trailing spaces
 		s = s.trim();
@@ -213,10 +209,17 @@ public class Client {
 			String[] splitStr = line.split("\\s+");
 
 			// 
-			// Constructing based off of this definition:
-			//	String		int			String		int			int		int		int		int			int
-			//	serverType 	serverID 	state 	curStartTime 	core 	mem 	disk 	waittinme 	runtime
+			//	Generate new server with these values:
 			//
+			//	String	serverType
+			//	int		serverID
+			//	String	state
+			//	int		startTime
+			//	int		cores
+			//	int		memory
+			//	int		disk
+			//	int		watTime
+			//	int		runTime
 
 			//						server type		server ID					state		curStart Time					core count						memory						disk							wJobs							rJobs
 			Server server = new Server(splitStr[0], 
@@ -239,7 +242,7 @@ public class Client {
 	//
 	//	create a new job object
 	//
-	public Job jobCreator(String job){
+	public Job addJob(String job){
 
 		// remove trailing spaces
 		job = job.trim();
@@ -248,10 +251,14 @@ public class Client {
 		String[] splitStr = job.split("\\s+");
 
 		//
-		//	Create a new job object;
-		//		[1] = submit Time	| [4] = core req
-		//		[2] = jobID	 	 	| [5] =	memory req
-		//		[3] = run Time 	 	| [6] =	disk req
+		//	Create new job
+		//
+		//		int submit Time
+		//		int jobID	 
+		//		int run Time 	
+		//		int core req
+		//		int	memory req
+		// 	 	int	disk req
 		//
 		Job j = new Job(Integer.parseInt(splitStr[1]), 
 						Integer.parseInt(splitStr[2]), 
